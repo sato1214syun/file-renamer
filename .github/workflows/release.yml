@@ -3,10 +3,18 @@
 #   - v で始まるタグを push（例: v0.4.0）: さらに GitHub Releases に公開
 name: Release build
 
+# 手動実行のみ（Actions タブ → Release build → Run workflow）
 on:
   workflow_dispatch:
-  push:
-    tags: ["v*"]
+    inputs:
+      publish:
+        description: "GitHub Releases に公開する（タグ名を下に入力）"
+        type: boolean
+        default: false
+      tag:
+        description: "公開するタグ名（例: v0.4.0）"
+        type: string
+        required: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -19,11 +27,11 @@ jobs:
       matrix:
         include:
           - { os: windows-latest, target: x86_64-pc-windows-msvc,  name: windows-x64 }
-          - { os: windows-latest, target: aarch64-pc-windows-msvc, name: windows-arm64 }
+          - { os: windows-11-arm, target: aarch64-pc-windows-msvc, name: windows-arm64 }
           - { os: macos-latest,   target: aarch64-apple-darwin,    name: macos-arm64 }
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: dtolnay/rust-toolchain@1.100
         with:
@@ -34,19 +42,23 @@ jobs:
           key: release-${{ matrix.target }}
 
       # ring を ARM64 Windows 向けにビルドするには AArch64 対応の clang が必要
-      - name: Use LLVM clang (Windows ARM64)
-        if: matrix.target == 'aarch64-pc-windows-msvc'
+      - name: Install LLVM (Windows ARM64)
+        if: matrix.name == 'windows-arm64'
         shell: pwsh
         run: |
           $llvm = "C:\Program Files\LLVM\bin"
-          if (-not (Test-Path "$llvm\clang.exe")) { choco install llvm -y --no-progress }
-          "CC_aarch64_pc_windows_msvc=$llvm\clang.exe"   >> $env:GITHUB_ENV
+          if (-not (Test-Path "$llvm\clang.exe")) {
+            $ver = "22.1.4"
+            $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-$ver/LLVM-$ver-woa64.exe"
+            Invoke-WebRequest $url -OutFile "$env:RUNNER_TEMP\llvm.exe"
+            Start-Process "$env:RUNNER_TEMP\llvm.exe" -ArgumentList "/S" -Wait
+          }
+          "CC_aarch64_pc_windows_msvc=$llvm\clang.exe"    >> $env:GITHUB_ENV
           "AR_aarch64_pc_windows_msvc=$llvm\llvm-lib.exe" >> $env:GITHUB_ENV
           & "$llvm\clang.exe" --version
 
-      # ARM64 版は x64 のランナー上では実行できないためテストは省略
+      # すべてネイティブのランナーなので、ARM64 版もテストできる
       - name: Test core / fs
-        if: matrix.target != 'aarch64-pc-windows-msvc'
         run: cargo test -p renamer-core -p renamer-fs --target ${{ matrix.target }}
 
       - name: Build
@@ -73,7 +85,7 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: inputs.publish && inputs.tag != ''
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -86,5 +98,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag }}
+          target_commitish: ${{ github.sha }}
           files: dist/*.zip
           generate_release_notes: true

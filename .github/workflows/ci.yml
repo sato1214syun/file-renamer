@@ -1,16 +1,13 @@
-# push / pull request ごとにテストとビルドを確認する
 name: CI
 
+# 手動実行のみ（Actions タブ → CI → Run workflow）
 on:
-  push:
-    branches: ["**"]
-    tags-ignore: ["v*"]
-  pull_request:
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
+
 
 env:
   CARGO_TERM_COLOR: always
@@ -22,11 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, name: windows-x64 }
-          - { os: macos-latest,   name: macos-arm64 }
+          - { os: windows-latest,  name: windows-x64 }
+          - { os: windows-11-arm,  name: windows-arm64 }
+          - { os: macos-latest,    name: macos-arm64 }
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: dtolnay/rust-toolchain@1.100
         with:
@@ -35,6 +33,22 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: ci-${{ matrix.name }}
+
+      # ring を ARM64 Windows 向けにビルドするには AArch64 対応の clang が必要
+      - name: Install LLVM (Windows ARM64)
+        if: matrix.name == 'windows-arm64'
+        shell: pwsh
+        run: |
+          $llvm = "C:\Program Files\LLVM\bin"
+          if (-not (Test-Path "$llvm\clang.exe")) {
+            $ver = "22.1.4"
+            $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-$ver/LLVM-$ver-woa64.exe"
+            Invoke-WebRequest $url -OutFile "$env:RUNNER_TEMP\llvm.exe"
+            Start-Process "$env:RUNNER_TEMP\llvm.exe" -ArgumentList "/S" -Wait
+          }
+          "CC_aarch64_pc_windows_msvc=$llvm\clang.exe"    >> $env:GITHUB_ENV
+          "AR_aarch64_pc_windows_msvc=$llvm\llvm-lib.exe" >> $env:GITHUB_ENV
+          & "$llvm\clang.exe" --version
 
       - name: Format check
         run: cargo fmt --all -- --check
