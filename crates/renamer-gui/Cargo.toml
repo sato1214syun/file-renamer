@@ -1,0 +1,21 @@
+[package]
+name = "renamer-gui"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "GPUI フロントエンド"
+
+[[bin]]
+name = "flex-renamer"
+path = "src/main.rs"
+
+[dependencies]
+renamer-core = { path = "../renamer-core" }
+renamer-fs = { path = "../renamer-fs" }
+gpui.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+unicode-segmentation.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

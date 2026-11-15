@@ -1,0 +1,31 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/renamer-core",
+    "crates/renamer-fs",
+    "crates/renamer-gui",
+]
+default-members = ["crates/renamer-gui"]
+
+[workspace.package]
+version = "0.4.0"
+edition = "2024"
+rust-version = "1.100"
+license = "MIT"
+
+[workspace.dependencies]
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+regex = "1"
+walkdir = "2"
+unicode-segmentation = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# GPUI: crates.io の最新公開版に完全固定（pre-1.0 のため破壊的変更が多い）
+gpui = "=0.2.2"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

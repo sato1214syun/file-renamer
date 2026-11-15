@@ -1,0 +1,15 @@
+[package]
+name = "renamer-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "OS非依存のリネームルールとプラン生成"
+
+[dependencies]
+thiserror.workspace = true
+serde.workspace = true
+regex.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
