@@ -1,0 +1,90 @@
+# 配布用ビルド
+#   - 手動実行（Actions タブ → Release build → Run workflow）: Artifacts に保存
+#   - v で始まるタグを push（例: v0.4.0）: さらに GitHub Releases に公開
+name: Release build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, target: x86_64-pc-windows-msvc,  name: windows-x64 }
+          - { os: windows-latest, target: aarch64-pc-windows-msvc, name: windows-arm64 }
+          - { os: macos-latest,   target: aarch64-apple-darwin,    name: macos-arm64 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@1.100
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+
+      # ring を ARM64 Windows 向けにビルドするには AArch64 対応の clang が必要
+      - name: Use LLVM clang (Windows ARM64)
+        if: matrix.target == 'aarch64-pc-windows-msvc'
+        shell: pwsh
+        run: |
+          $llvm = "C:\Program Files\LLVM\bin"
+          if (-not (Test-Path "$llvm\clang.exe")) { choco install llvm -y --no-progress }
+          "CC_aarch64_pc_windows_msvc=$llvm\clang.exe"   >> $env:GITHUB_ENV
+          "AR_aarch64_pc_windows_msvc=$llvm\llvm-lib.exe" >> $env:GITHUB_ENV
+          & "$llvm\clang.exe" --version
+
+      # ARM64 版は x64 のランナー上では実行できないためテストは省略
+      - name: Test core / fs
+        if: matrix.target != 'aarch64-pc-windows-msvc'
+        run: cargo test -p renamer-core -p renamer-fs --target ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release -p renamer-gui --target ${{ matrix.target }}
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          $exe = "dist/flex-renamer-${{ matrix.name }}.exe"
+          Copy-Item "target/${{ matrix.target }}/release/flex-renamer.exe" $exe
+          Compress-Archive -Path $exe -DestinationPath "dist/flex-renamer-${{ matrix.name }}.zip" -Force
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: sh scripts/bundle-macos.sh ${{ matrix.target }} ${{ matrix.name }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flex-renamer-${{ matrix.name }}
+          path: dist/*.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true

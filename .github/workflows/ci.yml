@@ -1,26 +1,46 @@
+# push / pull request ごとにテストとビルドを確認する
 name: CI
 
 on:
   push:
+    branches: ["**"]
+    tags-ignore: ["v*"]
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  test:
+    name: Test (${{ matrix.name }})
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - { os: windows-latest, name: windows-x64 }
+          - { os: macos-latest,   name: macos-arm64 }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: dtolnay/rust-toolchain@1.100
-      - name: Install Linux dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxkbcommon-x11-dev libwayland-dev libx11-xcb-dev \
-            libxcb1-dev libfontconfig-dev libfreetype-dev libvulkan-dev
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ci-${{ matrix.name }}
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
       - name: Test core / fs
         run: cargo test -p renamer-core -p renamer-fs
+
       - name: Build GUI
         run: cargo build -p renamer-gui
