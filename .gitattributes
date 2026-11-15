@@ -1,3 +1,4 @@
 # シェルスクリプトは Windows で編集しても LF のまま（CRLF だと macOS で実行できない）
 *.sh text eol=lf
 *.yml text eol=lf
+.githooks/* text eol=lf
