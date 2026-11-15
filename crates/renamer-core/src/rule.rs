@@ -370,10 +370,7 @@ impl RenameRule {
             Self::RegexReplace {
                 pattern,
                 replacement,
-            } => vec![
-                text("正規表現", pattern),
-                token_text("置換後", replacement),
-            ],
+            } => vec![text("正規表現", pattern), token_text("置換後", replacement)],
             Self::Prefix { value } => vec![token_text("追加する文字", value)],
             Self::Suffix { value } => vec![token_text("追加する文字", value)],
             Self::Insert { position, value } => vec![
@@ -606,7 +603,10 @@ fn regex_error_message(e: &regex::Error) -> String {
             let position = column
                 .map(|c| format!("（{c} 文字目）"))
                 .unwrap_or_default();
-            format!("正規表現の誤り: {}{position}", translate_regex_error(message))
+            format!(
+                "正規表現の誤り: {}{position}",
+                translate_regex_error(message)
+            )
         }
         regex::Error::CompiledTooBig(_) => "正規表現が大きすぎます".to_string(),
         other => format!("正規表現の誤り: {}", other.to_string().replace('\n', " ")),
@@ -631,12 +631,24 @@ fn translate_regex_error(msg: &str) -> String {
             "incomplete escape sequence",
             "末尾の「\\」の後に文字がありません",
         ),
-        ("unrecognized escape sequence", "使えないエスケープ（\\）です"),
-        ("invalid character class range", "[ ] 内の範囲の順序が逆です"),
+        (
+            "unrecognized escape sequence",
+            "使えないエスケープ（\\）です",
+        ),
+        (
+            "invalid character class range",
+            "[ ] 内の範囲の順序が逆です",
+        ),
         ("look-around", "先読み・後読みは使えません"),
-        ("backreferences are not supported", "後方参照（\\1 など）は使えません"),
+        (
+            "backreferences are not supported",
+            "後方参照（\\1 など）は使えません",
+        ),
         ("empty character class", "空の [ ] は使えません"),
-        ("invalid repetition count range", "{ } 内の回数の範囲が不正です"),
+        (
+            "invalid repetition count range",
+            "{ } 内の回数の範囲が不正です",
+        ),
         ("duplicate capture group name", "グループ名が重複しています"),
     ];
     TABLE
@@ -914,7 +926,10 @@ mod tests {
 
     #[test]
     fn regex_groups_followed_by_text() {
-        assert_eq!(run(regex(r"(\d+)_(\w+)", "$2_$1"), "001_abc.txt", 0), "abc_001.txt");
+        assert_eq!(
+            run(regex(r"(\d+)_(\w+)", "$2_$1"), "001_abc.txt", 0),
+            "abc_001.txt"
+        );
         assert_eq!(run(regex(r"(\d+)", "$1a"), "x12.txt", 0), "x12a.txt");
         assert_eq!(run(regex(r"(\d)(\d)", "$2$1"), "12.txt", 0), "21.txt");
         assert_eq!(run(regex(r"(a)", "$10"), "a.txt", 0), "a0.txt");
@@ -1010,7 +1025,12 @@ mod tests {
             mode: CaseMode::Lower,
         };
         assert!(rule.set_choice(0, 2));
-        assert_eq!(rule, RenameRule::Case { mode: CaseMode::Title });
+        assert_eq!(
+            rule,
+            RenameRule::Case {
+                mode: CaseMode::Title
+            }
+        );
         assert!(!rule.set_choice(0, 9));
 
         let mut rule = RenameRule::templates()
@@ -1018,7 +1038,10 @@ mod tests {
             .find(|r| matches!(r, RenameRule::WidthConvert { .. }))
             .unwrap();
         assert!(rule.set_bool(4, true));
-        assert!(matches!(rule, RenameRule::WidthConvert { katakana: true, .. }));
+        assert!(matches!(
+            rule,
+            RenameRule::WidthConvert { katakana: true, .. }
+        ));
         match &rule.fields()[0].value {
             FieldValue::Choice { options, selected } => {
                 assert_eq!(options.len(), 2);

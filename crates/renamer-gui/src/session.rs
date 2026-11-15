@@ -55,8 +55,7 @@ impl Session {
     }
 
     pub fn write_json(json: &str) -> std::io::Result<()> {
-        let path =
-            Self::path().ok_or_else(|| std::io::Error::other("保存先を特定できません"))?;
+        let path = Self::path().ok_or_else(|| std::io::Error::other("保存先を特定できません"))?;
         if let Some(dir) = path.parent() {
             std::fs::create_dir_all(dir)?;
         }

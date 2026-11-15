@@ -520,7 +520,12 @@ impl RenamerView {
         self.recompute(cx);
     }
 
-    pub(crate) fn set_field_choice(&mut self, field: usize, selected: usize, cx: &mut Context<Self>) {
+    pub(crate) fn set_field_choice(
+        &mut self,
+        field: usize,
+        selected: usize,
+        cx: &mut Context<Self>,
+    ) {
         let Some(entry) = self.selected_rule.and_then(|i| self.rules.get_mut(i)) else {
             return;
         };
@@ -717,7 +722,12 @@ impl RenamerView {
 
     // ---------------------------------------------------------------- 境界・つまみのドラッグ
 
-    pub(crate) fn begin_drag(&mut self, kind: DragKind, start: Point<Pixels>, cx: &mut Context<Self>) {
+    pub(crate) fn begin_drag(
+        &mut self,
+        kind: DragKind,
+        start: Point<Pixels>,
+        cx: &mut Context<Self>,
+    ) {
         let start_value = match kind {
             DragKind::Column(c) => self.layout.column_widths[c],
             DragKind::LeftPanel => self.layout.left_width,
@@ -726,7 +736,11 @@ impl RenamerView {
             DragKind::Pane(Pane::Editor) => self.layout.editor_height,
             DragKind::Thumb { target, .. } => {
                 let offset = self.scroll_handle(target).offset();
-                -f32::from(if target.is_vertical() { offset.y } else { offset.x })
+                -f32::from(if target.is_vertical() {
+                    offset.y
+                } else {
+                    offset.x
+                })
             }
         };
         self.drag = Some(ActiveDrag {
@@ -760,8 +774,8 @@ impl RenamerView {
                 l.column_widths[c] = (drag.start_value + dx).max(MIN_COLUMN_WIDTH);
             }
             DragKind::LeftPanel => {
-                let max = (f32::from(window.viewport_size().width) - MIN_RIGHT_WIDTH)
-                    .max(MIN_LEFT_WIDTH);
+                let max =
+                    (f32::from(window.viewport_size().width) - MIN_RIGHT_WIDTH).max(MIN_LEFT_WIDTH);
                 l.left_width = (drag.start_value + dx).clamp(MIN_LEFT_WIDTH, max);
             }
             DragKind::Pane(pane) => {
@@ -875,7 +889,11 @@ impl RenamerView {
 fn sanitize_layout(mut l: Layout) -> Layout {
     let d = Layout::default();
     let fix = |v: f32, min: f32, default: f32| {
-        if v.is_finite() && v >= min { v } else { default }
+        if v.is_finite() && v >= min {
+            v
+        } else {
+            default
+        }
     };
     l.left_width = fix(l.left_width, MIN_LEFT_WIDTH, d.left_width);
     l.preset_height = fix(l.preset_height, MIN_PANE_HEIGHT, d.preset_height);

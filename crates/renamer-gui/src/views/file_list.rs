@@ -248,7 +248,11 @@ impl RenamerView {
                         }),
                     ),
             )
-            .child(column(w_name).text_color(rgb(name_color)).child(source_name))
+            .child(
+                column(w_name)
+                    .text_color(rgb(name_color))
+                    .child(source_name),
+            )
             .child(spacer())
             .child(column(w_new).text_color(rgb(new_color)).child(new_name))
             .child(spacer())

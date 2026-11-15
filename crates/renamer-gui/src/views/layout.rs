@@ -62,7 +62,11 @@ impl RenamerView {
     }
 
     /// 領域の下端の横の境界（上下にドラッグして高さを変える）。
-    pub(crate) fn horizontal_splitter(&self, pane: Pane, cx: &mut Context<Self>) -> impl IntoElement {
+    pub(crate) fn horizontal_splitter(
+        &self,
+        pane: Pane,
+        cx: &mut Context<Self>,
+    ) -> impl IntoElement {
         let t = self.theme();
         let active = self.drag.is_some_and(|d| d.kind == DragKind::Pane(pane));
         let accent = t.accent;
@@ -145,7 +149,11 @@ impl RenamerView {
         let dragging = self
             .drag
             .is_some_and(|d| matches!(d.kind, DragKind::Thumb { target: tg, .. } if tg == target));
-        let color = if dragging { t.scrollbar_hover } else { t.scrollbar };
+        let color = if dragging {
+            t.scrollbar_hover
+        } else {
+            t.scrollbar
+        };
         let hover = t.scrollbar_hover;
 
         let thumb = div()

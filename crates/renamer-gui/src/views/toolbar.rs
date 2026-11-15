@@ -18,8 +18,7 @@ impl RenamerView {
         };
         let has_input = !self.inputs.is_empty();
 
-        let target_options: Vec<&'static str> =
-            TargetType::ALL.iter().map(|v| v.label()).collect();
+        let target_options: Vec<&'static str> = TargetType::ALL.iter().map(|v| v.label()).collect();
         let target_index = TargetType::ALL
             .iter()
             .position(|v| *v == self.scan_options.target)
@@ -43,26 +42,32 @@ impl RenamerView {
                     .flex()
                     .items_center()
                     .gap_2()
-                    .child(button(t, "open-folder", "フォルダを開く", true).on_click(
-                        cx.listener(|this, _: &ClickEvent, _, cx| this.browse(true, cx)),
-                    ))
+                    .child(
+                        button(t, "open-folder", "フォルダを開く", true).on_click(
+                            cx.listener(|this, _: &ClickEvent, _, cx| this.browse(true, cx)),
+                        ),
+                    )
                     .child(button(t, "open-files", "ファイルを選択", true).on_click(
                         cx.listener(|this, _: &ClickEvent, _, cx| this.browse(false, cx)),
                     ))
-                    .child(button(t, "reload", "再読込", has_input).on_click(cx.listener(
-                        |this, _: &ClickEvent, _, cx| {
-                            if !this.inputs.is_empty() {
-                                this.rescan(cx);
-                            }
-                        },
-                    )))
-                    .child(button(t, "clear", "クリア", has_input).on_click(cx.listener(
-                        |this, _: &ClickEvent, _, cx| {
-                            if !this.inputs.is_empty() {
-                                this.clear_inputs(cx);
-                            }
-                        },
-                    )))
+                    .child(
+                        button(t, "reload", "再読込", has_input).on_click(cx.listener(
+                            |this, _: &ClickEvent, _, cx| {
+                                if !this.inputs.is_empty() {
+                                    this.rescan(cx);
+                                }
+                            },
+                        )),
+                    )
+                    .child(
+                        button(t, "clear", "クリア", has_input).on_click(cx.listener(
+                            |this, _: &ClickEvent, _, cx| {
+                                if !this.inputs.is_empty() {
+                                    this.clear_inputs(cx);
+                                }
+                            },
+                        )),
+                    )
                     .child(
                         div()
                             .flex_1()
@@ -118,10 +123,12 @@ impl RenamerView {
                             "サブフォルダを含める",
                             self.scan_options.recursive,
                         )
-                        .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
-                            this.scan_options.recursive = !this.scan_options.recursive;
-                            this.rescan(cx);
-                        })),
+                        .on_click(cx.listener(
+                            |this, _: &ClickEvent, _, cx| {
+                                this.scan_options.recursive = !this.scan_options.recursive;
+                                this.rescan(cx);
+                            },
+                        )),
                     )
                     .child(
                         check_label(
@@ -130,10 +137,13 @@ impl RenamerView {
                             "隠しファイルを含める",
                             self.scan_options.include_hidden,
                         )
-                        .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
-                            this.scan_options.include_hidden = !this.scan_options.include_hidden;
-                            this.rescan(cx);
-                        })),
+                        .on_click(cx.listener(
+                            |this, _: &ClickEvent, _, cx| {
+                                this.scan_options.include_hidden =
+                                    !this.scan_options.include_hidden;
+                                this.rescan(cx);
+                            },
+                        )),
                     )
                     .child(
                         check_label(
@@ -142,21 +152,18 @@ impl RenamerView {
                             "拡張子もルールの対象にする",
                             self.plan_options.include_extension,
                         )
-                        .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
-                            this.plan_options.include_extension =
-                                !this.plan_options.include_extension;
-                            this.recompute(cx);
-                        })),
+                        .on_click(cx.listener(
+                            |this, _: &ClickEvent, _, cx| {
+                                this.plan_options.include_extension =
+                                    !this.plan_options.include_extension;
+                                this.recompute(cx);
+                            },
+                        )),
                     )
-                    .child(
-                        div()
-                            .text_xs()
-                            .text_color(rgb(t.muted))
-                            .child(format!(
-                                "名前のチェック: {} の規則",
-                                Platform::current().label()
-                            )),
-                    ),
+                    .child(div().text_xs().text_color(rgb(t.muted)).child(format!(
+                        "名前のチェック: {} の規則",
+                        Platform::current().label()
+                    ))),
             )
     }
 }

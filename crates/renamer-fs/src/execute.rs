@@ -131,7 +131,11 @@ fn restore_partial(group: &[Operation], temps: &[PathBuf], completed: usize) {
 fn rollback(done: &[Operation]) {
     for op in done.iter().rev() {
         if let Err(e) = fs::rename(&op.to, &op.from) {
-            tracing::error!("巻き戻し失敗 {} -> {}: {e}", op.to.display(), op.from.display());
+            tracing::error!(
+                "巻き戻し失敗 {} -> {}: {e}",
+                op.to.display(),
+                op.from.display()
+            );
         }
     }
 }

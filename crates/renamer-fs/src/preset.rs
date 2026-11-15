@@ -4,7 +4,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use renamer_core::{
-    Platform, PlanOptions, RenamerError, Result, RuleEntry, natural_cmp, validate_name,
+    PlanOptions, Platform, RenamerError, Result, RuleEntry, natural_cmp, validate_name,
     validate_name_for,
 };
 use serde::{Deserialize, Serialize};

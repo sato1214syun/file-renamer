@@ -59,7 +59,9 @@ impl RenamerView {
                     .text_color(rgb(t.muted))
                     .child(if open { "▲" } else { "▼" }),
             )
-            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| this.toggle_dropdown(key, cx)));
+            .on_click(
+                cx.listener(move |this, _: &ClickEvent, _, cx| this.toggle_dropdown(key, cx)),
+            );
 
         let mut root = div().relative().child(button);
         if open {
@@ -96,22 +98,23 @@ impl RenamerView {
                 })
                 .collect();
 
-            let menu = div()
-                .id(("dropdown-menu", id))
-                .occlude()
-                .min_w(px(180.0))
-                .py_1()
-                .rounded_md()
-                .border_1()
-                .border_color(rgb(t.border))
-                .bg(rgb(t.panel))
-                .text_color(rgb(t.text))
-                .text_sm()
-                .shadow_lg()
-                .children(items)
-                .on_mouse_down_out(cx.listener(move |this, _: &MouseDownEvent, _, cx| {
-                    this.close_dropdown(key, cx)
-                }));
+            let menu =
+                div()
+                    .id(("dropdown-menu", id))
+                    .occlude()
+                    .min_w(px(180.0))
+                    .py_1()
+                    .rounded_md()
+                    .border_1()
+                    .border_color(rgb(t.border))
+                    .bg(rgb(t.panel))
+                    .text_color(rgb(t.text))
+                    .text_sm()
+                    .shadow_lg()
+                    .children(items)
+                    .on_mouse_down_out(cx.listener(move |this, _: &MouseDownEvent, _, cx| {
+                        this.close_dropdown(key, cx)
+                    }));
 
             // ボタンの真下に、ほかの要素より手前に表示する
             root = root.child(

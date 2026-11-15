@@ -12,8 +12,8 @@ use gpui::{
     App, Bounds, ClipboardItem, ContentMask, Context, CursorStyle, ElementId, ElementInputHandler,
     Entity, EntityInputHandler, EventEmitter, FocusHandle, Focusable, GlobalElementId, KeyBinding,
     LayoutId, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, PaintQuad, Pixels, Point,
-    ShapedLine, SharedString, Style, TextRun, UTF16Selection, UnderlineStyle, Window, actions,
-    div, fill, point, prelude::*, px, relative, rgba, size,
+    ShapedLine, SharedString, Style, TextRun, UTF16Selection, UnderlineStyle, Window, actions, div,
+    fill, point, prelude::*, px, relative, rgba, size,
 };
 use unicode_segmentation::UnicodeSegmentation;
 

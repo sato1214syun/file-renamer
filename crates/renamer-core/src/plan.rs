@@ -234,7 +234,9 @@ mod tests {
         })];
         let entries = files(&["a.txt", "b.txt", "c.txt"]);
         let excluded: HashSet<PathBuf> = [PathBuf::from("/data/b.txt")].into();
-        let p = build_plan(&entries, &rules, &PlanOptions::default(), &excluded, |_| false);
+        let p = build_plan(&entries, &rules, &PlanOptions::default(), &excluded, |_| {
+            false
+        });
         assert_eq!(p.items[0].new_name, "a_01.txt");
         assert_eq!(p.items[1].status, CandidateStatus::Excluded);
         assert_eq!(p.items[2].new_name, "c_02.txt");
@@ -293,7 +295,11 @@ mod tests {
 
     #[test]
     fn invalid_name_reported() {
-        let p = plan(&["a.txt"], vec![RenameRule::Suffix { value: "/".into() }], &[]);
+        let p = plan(
+            &["a.txt"],
+            vec![RenameRule::Suffix { value: "/".into() }],
+            &[],
+        );
         assert!(matches!(p.items[0].status, CandidateStatus::Invalid(_)));
     }
 

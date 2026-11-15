@@ -83,9 +83,9 @@ impl RenamerView {
                     .px_3()
                     .pb_1()
                     .child(self.input_frame(t, &self.preset_name, false, window, cx))
-                    .child(button(t, "preset-save", "保存", true).on_click(cx.listener(
-                        |this, _: &ClickEvent, _, cx| this.save_current_preset(cx),
-                    ))),
+                    .child(button(t, "preset-save", "保存", true).on_click(
+                        cx.listener(|this, _: &ClickEvent, _, cx| this.save_current_preset(cx)),
+                    )),
             )
             .child(
                 div().px_3().child(
@@ -149,43 +149,43 @@ impl RenamerView {
     }
 
     fn render_preset_list(&self, t: &Theme, cx: &mut Context<Self>) -> AnyElement {
-        let rows: Vec<AnyElement> = self
-            .presets
-            .iter()
-            .enumerate()
-            .map(|(i, name)| {
-                let load_name = name.clone();
-                let delete_name = name.clone();
-                let hover = t.hover;
-                div()
-                    .flex()
-                    .items_center()
-                    .gap_1()
-                    .child(
-                        div()
-                            .id(("preset", i))
-                            .flex_1()
-                            .min_w(px(0.0))
-                            .px_2()
-                            .py_1()
-                            .rounded_md()
-                            .overflow_hidden()
-                            .whitespace_nowrap()
-                            .cursor_pointer()
-                            .hover(move |s| s.bg(rgb(hover)))
-                            .child(name.clone())
-                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
-                                this.load_named_preset(load_name.clone(), cx)
-                            })),
-                    )
-                    .child(icon_button(t, ("preset-delete", i), "✕", true).on_click(
-                        cx.listener(move |this, _: &ClickEvent, _, cx| {
-                            this.delete_named_preset(delete_name.clone(), cx)
-                        }),
-                    ))
-                    .into_any_element()
-            })
-            .collect();
+        let rows: Vec<AnyElement> =
+            self.presets
+                .iter()
+                .enumerate()
+                .map(|(i, name)| {
+                    let load_name = name.clone();
+                    let delete_name = name.clone();
+                    let hover = t.hover;
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap_1()
+                        .child(
+                            div()
+                                .id(("preset", i))
+                                .flex_1()
+                                .min_w(px(0.0))
+                                .px_2()
+                                .py_1()
+                                .rounded_md()
+                                .overflow_hidden()
+                                .whitespace_nowrap()
+                                .cursor_pointer()
+                                .hover(move |s| s.bg(rgb(hover)))
+                                .child(name.clone())
+                                .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                    this.load_named_preset(load_name.clone(), cx)
+                                })),
+                        )
+                        .child(icon_button(t, ("preset-delete", i), "✕", true).on_click(
+                            cx.listener(move |this, _: &ClickEvent, _, cx| {
+                                this.delete_named_preset(delete_name.clone(), cx)
+                            }),
+                        ))
+                        .into_any_element()
+                })
+                .collect();
 
         div()
             .flex()
@@ -214,10 +214,11 @@ impl RenamerView {
                     .into_iter()
                     .enumerate()
                     .map(|(i, template)| {
-                        button(t, ("add-rule", gi * 100 + i), template.kind_name(), true)
-                            .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
+                        button(t, ("add-rule", gi * 100 + i), template.kind_name(), true).on_click(
+                            cx.listener(move |this, _: &ClickEvent, _, cx| {
                                 this.add_rule(template.clone(), cx)
-                            }))
+                            }),
+                        )
                     })
                     .collect();
                 div()
@@ -328,24 +329,32 @@ impl RenamerView {
                     } else {
                         t.disabled
                     }))
-                    .child(if has_error { format!("⚠ {label}") } else { label })
+                    .child(if has_error {
+                        format!("⚠ {label}")
+                    } else {
+                        label
+                    })
                     .on_click(
                         cx.listener(move |this, _: &ClickEvent, _, cx| this.select_rule(i, cx)),
                     ),
             )
-            .child(icon_button(t, ("rule-up", i), "↑", i > 0).on_click(cx.listener(
-                move |this, _: &ClickEvent, _, cx| {
-                    if i > 0 {
-                        this.reorder_rule(i, i - 1, cx)
-                    }
-                },
-            )))
-            .child(icon_button(t, ("rule-down", i), "↓", !last).on_click(cx.listener(
-                move |this, _: &ClickEvent, _, cx| this.reorder_rule(i, i + 1, cx),
-            )))
-            .child(icon_button(t, ("rule-remove", i), "✕", true).on_click(cx.listener(
-                move |this, _: &ClickEvent, _, cx| this.remove_rule(i, cx),
-            )))
+            .child(
+                icon_button(t, ("rule-up", i), "↑", i > 0).on_click(cx.listener(
+                    move |this, _: &ClickEvent, _, cx| {
+                        if i > 0 {
+                            this.reorder_rule(i, i - 1, cx)
+                        }
+                    },
+                )),
+            )
+            .child(icon_button(t, ("rule-down", i), "↓", !last).on_click(
+                cx.listener(move |this, _: &ClickEvent, _, cx| this.reorder_rule(i, i + 1, cx)),
+            ))
+            .child(
+                icon_button(t, ("rule-remove", i), "✕", true).on_click(
+                    cx.listener(move |this, _: &ClickEvent, _, cx| this.remove_rule(i, cx)),
+                ),
+            )
             .into_any_element()
     }
 
@@ -456,14 +465,24 @@ impl RenamerView {
             .flex_none()
             .text_color(rgb(t.muted));
 
-        let row = div().flex().items_center().gap_2().min_h(px(DROPDOWN_HEIGHT));
+        let row = div()
+            .flex()
+            .items_center()
+            .gap_2()
+            .min_h(px(DROPDOWN_HEIGHT));
         match field.value {
             FieldValue::Text(_) | FieldValue::Number(_) => {
                 let Some(input) = self.field_inputs.get(fi).cloned().flatten() else {
                     return div().into_any_element();
                 };
                 row.child(label.child(field.label))
-                    .child(self.input_frame(t, &input, self.invalid_fields.contains(&fi), window, cx))
+                    .child(self.input_frame(
+                        t,
+                        &input,
+                        self.invalid_fields.contains(&fi),
+                        window,
+                        cx,
+                    ))
                     .into_any_element()
             }
             FieldValue::Choice { options, selected } => row

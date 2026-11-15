@@ -148,7 +148,10 @@ mod tests {
 
     #[test]
     fn half_conversion() {
-        assert_eq!(to_half("ＡＢＣ１２３　（テスト）", &ALL, Platform::Unix), "ABC123 (ﾃｽﾄ)");
+        assert_eq!(
+            to_half("ＡＢＣ１２３　（テスト）", &ALL, Platform::Unix),
+            "ABC123 (ﾃｽﾄ)"
+        );
         assert_eq!(to_half("ガギパヴ", &ALL, Platform::Unix), "ｶﾞｷﾞﾊﾟｳﾞ");
     }
 
@@ -173,7 +176,10 @@ mod tests {
             space: false,
             katakana: false,
         };
-        assert_eq!(to_half("Ａ（ア）　", &only_alnum, Platform::Unix), "A（ア）　");
+        assert_eq!(
+            to_half("Ａ（ア）　", &only_alnum, Platform::Unix),
+            "A（ア）　"
+        );
         assert_eq!(to_full("A(ｱ) ", &only_alnum), "Ａ(ｱ) ");
     }
 
